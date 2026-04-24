@@ -793,7 +793,7 @@ export default function CustomerInterface() {
                                     <button className={`${styles.viewToggle} ${viewMode === 'list' ? styles.viewToggleActive : ''}`} onClick={() => setViewMode('list')}><ListIcon /></button>
                                 </div>
                             </div>
-                            <p className={styles.resultCount}>{sorted.length} product{sorted.length !== 1 ? 's' : ''}{searchQuery && <span> for "<strong>{searchQuery}</strong>"</span>}{selectedCategory !== 'all' && <span> in <strong>{selectedCategory}</strong></span>}</p>
+                            <p className={styles.resultCount}>{sorted.length} product{sorted.length !== 1 ? 's' : ''}{searchQuery && <span> for &quot;<strong>{searchQuery}</strong>&quot;</span>}{selectedCategory !== 'all' && <span> in <strong>{selectedCategory}</strong></span>}</p>
                             {sorted.length === 0 ? (
                                 <div className={styles.emptyState}>
                                     <BoxIcon /><h3>No products found</h3><p>Try different filters</p>
