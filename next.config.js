@@ -1,9 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    // Optimize images
     images: {
-        domains: ['localhost'],
+        domains: [
+            'localhost',
+            'nyc.cloud.appwrite.io',
+            'loremflickr.com',
+            'www.svgrepo.com',
+        ],
     },
 }
 

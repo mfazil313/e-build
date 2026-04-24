@@ -18,14 +18,27 @@ export default function ResetPassword() {
         setStatus('loading')
         setMessage('')
 
+        if (password.length < 8) {
+            setStatus('error')
+            setMessage('Password must be at least 8 characters long.')
+            return
+        }
+
         if (password !== confirmPassword) {
             setStatus('error')
             setMessage('Passwords do not match.')
             return
         }
 
+        if (!userId || !secret) {
+            setStatus('error')
+            setMessage('Invalid reset link. Please request a new password recovery email.')
+            return
+        }
+
         try {
-            await account.updateRecovery(userId, secret, password)
+            // Appwrite updateRecovery requires: userId, secret, password, passwordAgain
+            await account.updateRecovery(userId, secret, password, confirmPassword)
             setStatus('success')
             setMessage('Your password has been successfully reset.')
         } catch (error) {
@@ -34,7 +47,7 @@ export default function ResetPassword() {
         }
     }
 
-    // Hide until we have query params (or if error) to prevent hydration mismatch
+    // Hide until we have query params to prevent hydration mismatch
     const [mounted, setMounted] = useState(false)
     useEffect(() => {
         setMounted(true)

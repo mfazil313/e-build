@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 export default async function handler(req, res) {
     if (req.method === 'GET') {
         try {
-            // Fetch all products
             const products = await query('SELECT * FROM products ORDER BY created_at DESC')
             return res.status(200).json(products)
         } catch (error) {
@@ -17,7 +16,7 @@ export default async function handler(req, res) {
         const { name, category, price, unit, stock, minOrder, description, image, supplierId, supplierName, supplierLocation } = req.body
 
         if (!name || !price || !supplierId) {
-            return res.status(400).json({ message: 'Missing required fields' })
+            return res.status(400).json({ message: 'Missing required fields: name, price, and supplierId are required' })
         }
 
         try {
@@ -25,13 +24,17 @@ export default async function handler(req, res) {
             const now = new Date().toISOString()
 
             await run(
-                `INSERT INTO products (id, name, category, price, unit, stock, "minOrder", description, image, "supplierId", "supplierName", "supplierLocation", created_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [id, name, category, price, unit, stock, minOrder, description, image, supplierId, supplierName, supplierLocation, now]
+                `INSERT INTO products (id, name, category, price, unit, stock, "minOrder", description, image, "supplierId", "supplierName", "supplierLocation", created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [id, name, category || 'General', price, unit || 'unit', stock || 0, minOrder || 1, description || '', image || '', supplierId, supplierName || '', supplierLocation || '', now]
             )
 
             const newProduct = {
-                id, name, category, price, unit, stock, minOrder, description, image, supplierId, supplierName, supplierLocation, created_at: now
+                id, name, category: category || 'General', price, unit: unit || 'unit',
+                stock: stock || 0, minOrder: minOrder || 1, description: description || '',
+                image: image || '', supplierId, supplierName: supplierName || '',
+                supplierLocation: supplierLocation || '', created_at: now,
+                rating: 0, ratingCount: 0
             }
 
             return res.status(201).json(newProduct)

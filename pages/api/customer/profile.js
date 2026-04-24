@@ -1,6 +1,4 @@
 import { run, get } from '../../../lib/db'
-import fs from 'fs'
-import path from 'path'
 
 export const config = {
     api: {
@@ -11,21 +9,21 @@ export const config = {
 }
 
 export default async function handler(req, res) {
-    if (req.method === 'PUT') {
-        const logPath = path.resolve(process.cwd(), 'api_debug.log')
-        fs.appendFileSync(logPath, `${new Date().toISOString()} - PUT CUSTOMER: ${JSON.stringify(req.body)}\n`)
-    }
-
     // Initialize table if it doesn't exist
-    await run(`
-        CREATE TABLE IF NOT EXISTS customers (
-            id TEXT PRIMARY KEY,
-            "fullName" TEXT,
-            phone TEXT,
-            image TEXT,
-            "lastUpdated" TEXT
-        )
-    `)
+    try {
+        await run(`
+            CREATE TABLE IF NOT EXISTS customers (
+                id TEXT PRIMARY KEY,
+                "fullName" TEXT,
+                phone TEXT,
+                image TEXT,
+                "lastUpdated" TEXT
+            )
+        `)
+    } catch (err) {
+        // Table might already exist in PostgreSQL, ignore
+        console.warn('[customers] Table init:', err.message)
+    }
 
     const { customerId } = req.query
 
@@ -37,7 +35,6 @@ export default async function handler(req, res) {
         try {
             const profile = await get('SELECT * FROM customers WHERE id = ?', [customerId])
             if (!profile) {
-                // Return default values if profile doesn't exist yet
                 return res.status(200).json({
                     id: customerId,
                     fullName: '',
@@ -54,9 +51,8 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-        console.log('API: Received customer profile update request:', req.body)
         let { fullName, phone, image } = req.body
-        image = image || '' // Force to empty string if null or undefined
+        image = image || ''
         const now = new Date()
 
         try {
@@ -66,7 +62,7 @@ export default async function handler(req, res) {
                 const lastUpdate = new Date(profile.lastUpdated)
                 const diffTime = Math.abs(now - lastUpdate)
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-                const diffHours = Math.abs(now - lastUpdate) / (1000 * 60 * 60)
+                const diffHours = diffTime / (1000 * 60 * 60)
 
                 // Allow a 24-hour grace period for corrections
                 if (diffDays < 30 && diffHours > 24) {
@@ -79,7 +75,7 @@ export default async function handler(req, res) {
 
             const isoNow = now.toISOString()
 
-            // Use INSERT OR REPLACE for easier handling
+            // Upsert: INSERT or UPDATE on conflict
             await run(`
                 INSERT INTO customers (id, "fullName", phone, image, "lastUpdated")
                 VALUES (?, ?, ?, ?, ?)

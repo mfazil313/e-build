@@ -6,11 +6,9 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         try {
             const product = await get('SELECT * FROM products WHERE id = ?', [id])
-
             if (!product) {
                 return res.status(404).json({ message: 'Product not found' })
             }
-
             return res.status(200).json(product)
         } catch (error) {
             console.error('Fetch single product error:', error)
@@ -20,37 +18,30 @@ export default async function handler(req, res) {
 
     if (req.method === 'PUT') {
         try {
-            // Check if this is a partial update (like just a rating update)
+            // Check if this is a rating-only update
             if (Object.keys(req.body).length === 1 && req.body.rating !== undefined) {
                 const { rating } = req.body
 
-                // Fetch the current rating data
                 const currentProduct = await get('SELECT rating, "ratingCount" FROM products WHERE id = ?', [id])
                 if (!currentProduct) {
                     return res.status(404).json({ message: 'Product not found' })
                 }
 
-                // If this is the first rating, or rating is null, default to 0
                 const currentAvg = currentProduct.rating || 0
                 const currentCount = currentProduct.ratingCount || 0
-
-                // Calculate the new true average
-                // (Old Average * Old Count + New Rating) / (Old Count + 1)
                 const newCount = currentCount + 1
                 const newAvg = ((currentAvg * currentCount) + rating) / newCount
-
-                // Round to 1 decimal place
                 const finalRating = Number(newAvg.toFixed(1))
 
-                await run('UPDATE products SET rating=?, "ratingCount"=? WHERE id=?', [finalRating, newCount, id])
+                await run('UPDATE products SET rating = ?, "ratingCount" = ? WHERE id = ?', [finalRating, newCount, id])
                 return res.status(200).json({ success: true, message: 'Rating updated', newRating: finalRating, newCount })
             }
 
-            // Otherwise, it's a full product update from the supplier dashboard
+            // Full product update from supplier dashboard
             const { name, category, price, unit, stock, minOrder, description, image } = req.body
             await run(
-                `UPDATE products SET name=?, category=?, price=?, unit=?, stock=?, "minOrder"=?, description=?, image=? WHERE id=?`,
-                [name, category, price, unit, stock, minOrder, description, image, id]
+                `UPDATE products SET name = ?, category = ?, price = ?, unit = ?, stock = ?, "minOrder" = ?, description = ?, image = ? WHERE id = ?`,
+                [name, category, price, unit, stock, minOrder, description, image || '', id]
             )
             return res.status(200).json({ success: true, message: 'Product updated' })
         } catch (error) {

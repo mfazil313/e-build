@@ -18,7 +18,7 @@ export function AppProvider({ children }) {
     // ── Cart ──────────────────────────────────────────
     const [cart, setCart] = useState([])
 
-    // ── Orders (persisted to localStorage) ───────────
+    // ── Orders (server-persisted + localStorage cache) ─
     const [orders, setOrders] = useState([])
 
     // ── Appwrite Session Check ────────────────────────
@@ -26,49 +26,51 @@ export function AppProvider({ children }) {
         try {
             console.log(`Appwrite: Checking session (attempt ${retryCount + 1})...`)
             const user = await account.get()
-            console.log('Appwrite: User found:', user)
 
             if (user) {
-                let prefs = await account.getPrefs()
+                let prefs = {}
+                try {
+                    prefs = await account.getPrefs()
+                } catch (e) {
+                    console.warn('Appwrite: Could not fetch prefs:', e.message)
+                }
                 let role = prefs.role
-                console.log('Appwrite: Prefs role:', role)
 
                 const cookieRole = Cookies.get('auth-role-preference')
-                console.log('Appwrite: Cookie role found:', cookieRole)
 
                 let needPrefsUpdate = false
 
                 if (cookieRole) {
-                    // Always honor the intent form OAuth if present
                     if (role !== cookieRole) {
                         role = cookieRole
                         needPrefsUpdate = true
                     }
                     Cookies.remove('auth-role-preference')
                 } else if (!role) {
-                    // Infer from path as ultimate fallback
                     const path = window.location.pathname
                     if (path.includes('supplier')) role = 'supplier'
                     else if (path.includes('driver')) role = 'driver'
                     else role = 'customer'
-                    console.log('Appwrite: Inferred role from path:', role)
                     needPrefsUpdate = true
                 }
 
                 if (needPrefsUpdate && role) {
-                    await account.updatePrefs({ role })
-                    console.log('Appwrite: Role updated in prefs to:', role)
+                    try {
+                        await account.updatePrefs({ role })
+                    } catch (e) {
+                        console.warn('Appwrite: Could not update prefs:', e.message)
+                    }
                 }
 
                 setIsAuthenticated(true)
                 setCurrentUser(user)
                 setUserRole(role || 'customer')
 
-                // Load this user's own order history
+                // Load this user's data
                 const uid = user.$id || user.id
                 loadOrdersForUser(uid)
+                fetchOrdersFromAPI(uid)
 
-                // Load user-scoped cart if available
                 try {
                     const cartKey = userCartKey(uid)
                     const stored = localStorage.getItem(cartKey)
@@ -78,10 +80,7 @@ export function AppProvider({ children }) {
         } catch (error) {
             console.warn('Appwrite: Session check failed:', error.message)
 
-            // If we just got redirected back from Auth, maybe the cookie isn't ready?
-            // Try one retry after a short delay if it's the first attempt
             if (retryCount < 1 && window.location.search.includes('hash=')) {
-                console.log('Appwrite: Detected OAuth return, retrying check...')
                 setTimeout(() => checkSession(retryCount + 1), 500)
                 return
             }
@@ -98,7 +97,7 @@ export function AppProvider({ children }) {
     const userOrdersKey = (uid) => uid ? `buildmart_orders_${uid}` : 'buildmart_orders_guest'
     const userCartKey = (uid) => uid ? `buildmart_cart_${uid}` : 'buildmart_cart'
 
-    // ── Helper: load orders for a specific user ───────
+    // ── Helper: load orders from localStorage (offline cache) ───
     const loadOrdersForUser = useCallback((uid) => {
         try {
             const key = userOrdersKey(uid)
@@ -107,11 +106,10 @@ export function AppProvider({ children }) {
                 setOrders(JSON.parse(stored))
                 return
             }
-            // One-time migration: if user has no scoped key, check old global key
+            // One-time migration from old global key
             const legacy = localStorage.getItem('buildmart_orders')
             if (legacy) {
                 const parsed = JSON.parse(legacy)
-                // Migrate orders that belong to this user
                 const mine = Array.isArray(parsed)
                     ? parsed.filter(o => !o.customerId || o.customerId === uid)
                     : []
@@ -123,9 +121,30 @@ export function AppProvider({ children }) {
         } catch { }
     }, [])
 
+    // ── Helper: fetch orders from API (server source of truth) ───
+    const fetchOrdersFromAPI = useCallback(async (uid) => {
+        if (!uid) return
+        try {
+            const res = await fetch(`/api/orders?customerId=${uid}`)
+            if (res.ok) {
+                const data = await res.json()
+                if (Array.isArray(data) && data.length > 0) {
+                    setOrders(prev => {
+                        // Merge: API orders take precedence, keep local-only orders
+                        const apiIds = new Set(data.map(o => o.id))
+                        const localOnly = prev.filter(o => !apiIds.has(o.id))
+                        const merged = [...data, ...localOnly]
+                        return merged
+                    })
+                }
+            }
+        } catch (err) {
+            console.warn('Could not fetch orders from API:', err.message)
+        }
+    }, [])
+
     // ── Hydrate on mount ──────────────────────────────
     useEffect(() => {
-        // Load or create deviceId
         let storedId = localStorage.getItem('buildmart_deviceId')
         if (!storedId) {
             storedId = `guest-${Math.random().toString(36).substr(2, 9)}`
@@ -133,10 +152,8 @@ export function AppProvider({ children }) {
         }
         setDeviceId(storedId)
 
-        // Check Appwrite session instead of localStorage
         checkSession()
 
-        // Safety timeout: Ensure loading screen doesn't hang forever
         const safetyRetry = setTimeout(() => {
             setAuthLoading(prev => {
                 if (prev) {
@@ -147,28 +164,24 @@ export function AppProvider({ children }) {
             })
         }, 5000)
 
-        // Load cart (user-scoped; guest cart loaded here at mount before login)
         try {
             const storedCart = localStorage.getItem('buildmart_cart')
             if (storedCart) setCart(JSON.parse(storedCart))
         } catch { }
 
-        // Orders loaded after session check resolves (see checkSession)
         fetchProducts()
         return () => clearTimeout(safetyRetry)
-    }, [checkSession]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [checkSession])
 
     // ── CROSS-TAB SYNC ────────────────────────────────
     useEffect(() => {
         const handleStorageChange = (e) => {
-            if (e.key === 'buildmart_orders') {
+            if (e.key && e.key.startsWith('buildmart_orders_')) {
                 try {
                     const updated = JSON.parse(e.newValue)
                     setOrders(updated || [])
                 } catch { }
             }
-            // For Appwrite, we might rely on the SDK or cookies, 
-            // but we'll monitor 'appwrite_auth_sync' for manual logout across tabs
             if (e.key === 'appwrite_logout_sync') {
                 setIsAuthenticated(false)
                 setCurrentUser(null)
@@ -180,15 +193,16 @@ export function AppProvider({ children }) {
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
-    // ── Persist to user-scoped localStorage ──────────
+    // ── Persist cart to localStorage ──────────────────
     useEffect(() => {
         const uid = currentUser?.$id || currentUser?.id
         localStorage.setItem(userCartKey(uid), JSON.stringify(cart))
     }, [cart, currentUser])
 
+    // ── Persist orders to localStorage (cache) ───────
     useEffect(() => {
         const uid = currentUser?.$id || currentUser?.id
-        if (!uid) return // don't overwrite scoped data with empty state during boot
+        if (!uid) return
         localStorage.setItem(userOrdersKey(uid), JSON.stringify(orders))
     }, [orders, currentUser])
 
@@ -196,30 +210,33 @@ export function AppProvider({ children }) {
     const login = async (email, password, role) => {
         try {
             const cleanEmail = email.trim()
-            // Pre-login cleanup: try to delete any existing session to avoid conflict
             try {
                 await account.deleteSession('current')
             } catch (e) {
-                // Ignore errors if no session exists
+                // Ignore if no session exists
             }
 
             await account.createEmailPasswordSession(cleanEmail, password)
             const user = await account.get()
-            const prefs = await account.getPrefs()
+            let prefs = {}
+            try {
+                prefs = await account.getPrefs()
+            } catch { }
 
-            // If they are logging in with a specific role, update it in prefs if not set
             const finalRole = role || prefs.role || 'customer'
             if (role && prefs.role !== role) {
-                await account.updatePrefs({ role })
+                try {
+                    await account.updatePrefs({ role })
+                } catch { }
             }
 
             setIsAuthenticated(true)
             setCurrentUser(user)
             setUserRole(finalRole)
 
-            // Load this user's persisted order history + cart
             const uid = user.$id || user.id
             loadOrdersForUser(uid)
+            fetchOrdersFromAPI(uid)
             try {
                 const stored = localStorage.getItem(userCartKey(uid))
                 if (stored) setCart(JSON.parse(stored))
@@ -235,10 +252,10 @@ export function AppProvider({ children }) {
         setIsAuthenticated(true)
         setUserRole(user.role)
         setCurrentUser(user)
-        // Load persisted data for this session user
         const uid = user.$id || user.id
         if (uid) {
             loadOrdersForUser(uid)
+            fetchOrdersFromAPI(uid)
             try {
                 const stored = localStorage.getItem(userCartKey(uid))
                 if (stored) setCart(JSON.parse(stored))
@@ -251,7 +268,9 @@ export function AppProvider({ children }) {
             const { email, password, name, role } = userData
             await account.create('unique()', email, password, name)
             await account.createEmailPasswordSession(email, password)
-            await account.updatePrefs({ role })
+            try {
+                await account.updatePrefs({ role })
+            } catch { }
 
             const user = await account.get()
             setIsAuthenticated(true)
@@ -269,7 +288,7 @@ export function AppProvider({ children }) {
             setIsAuthenticated(false)
             setUserRole(null)
             setCurrentUser(null)
-            setOrders([])   // clear from state — data is still in user-scoped key
+            setOrders([])
             setCart([])
             localStorage.setItem('appwrite_logout_sync', Date.now().toString())
         } catch (error) {
@@ -332,7 +351,6 @@ export function AppProvider({ children }) {
 
     const rateProduct = async (productId, rating) => {
         try {
-            // Optimistic UI update (simple averting for visual feedback)
             setProducts(prev => prev.map(p => {
                 if (p.id !== productId) return p
                 const oldRating = p.rating || 0
@@ -342,7 +360,6 @@ export function AppProvider({ children }) {
                 return { ...p, rating: Number(newRating.toFixed(1)), ratingCount: newCount }
             }))
 
-            // Send flat rating to backend, let DB calculate the true average
             const res = await fetch(`/api/products/${productId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -350,12 +367,10 @@ export function AppProvider({ children }) {
             })
 
             if (!res.ok) {
-                // Revert if failed
                 fetchProducts()
                 return { success: false, message: 'Failed to save rating' }
             }
 
-            // Sync with authoritative backend calculation
             const data = await res.json()
             if (data.success && data.newRating !== undefined) {
                 setProducts(prev => prev.map(p => p.id === productId ? { ...p, rating: data.newRating, ratingCount: data.newCount } : p))
@@ -402,9 +417,9 @@ export function AppProvider({ children }) {
 
     const clearCart = () => setCart([])
 
-    // ── Orders ────────────────────────────────────────
-    const createOrder = (orderData) => {
-        const uid = currentUser?.$id || currentUser?.id  // Appwrite uses $id
+    // ── Orders (now server-persisted) ─────────────────
+    const createOrder = async (orderData) => {
+        const uid = currentUser?.$id || currentUser?.id
         const newOrder = {
             ...orderData,
             id: `ORD-${Date.now()}`,
@@ -415,41 +430,60 @@ export function AppProvider({ children }) {
             status: 'new',
             supplierId: orderData.items?.[0]?.supplierId || null,
         }
+
+        // Update state immediately (optimistic)
         setOrders(prev => [newOrder, ...prev])
         clearCart()
+
+        // Persist to server in background
+        try {
+            await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newOrder)
+            })
+        } catch (err) {
+            console.warn('Failed to persist order to server:', err.message)
+            // Order is still in localStorage as fallback
+        }
+
         return newOrder
     }
 
-    const updateOrderStatus = (orderId, status, extra = {}) => {
+    const updateOrderStatus = async (orderId, status, extra = {}) => {
+        // Update state immediately
         setOrders(prev => prev.map(o =>
             o.id === orderId ? { ...o, status, ...extra } : o
         ))
+
+        // Persist to server
+        try {
+            await fetch(`/api/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status, ...extra })
+            })
+        } catch (err) {
+            console.warn('Failed to update order on server:', err.message)
+        }
     }
 
     // ── DELIVERY JOBS ─────────────────────────────────
-    // A Tempo order becomes a driver job as soon as the supplier ACCEPTS it
-    // (status: 'preparing') — driver doesn't have to wait for "Mark Ready"
     const deliveryJobs = orders.filter(
         o => o.deliveryMethod === 'tempo' &&
             (o.status === 'preparing' || o.status === 'ready') &&
             !o.rejectedBy?.includes(currentUser?.id || deviceId)
     )
 
-    // Driver accepts the job within 60 seconds
-    const claimDeliveryJob = (orderId, driverName, driverPhone = '') => {
-        setOrders(prev => prev.map(o =>
-            o.id === orderId
-                ? { ...o, status: 'in_transit', driverName, driverPhone, driverAcceptedAt: new Date().toISOString() }
-                : o
-        ))
+    const claimDeliveryJob = async (orderId, driverName, driverPhone = '') => {
+        const extra = { driverName, driverPhone, driverAcceptedAt: new Date().toISOString() }
+        await updateOrderStatus(orderId, 'in_transit', extra)
     }
 
-    // 60s timer expired — reset order so the next driver sees it
-    const rejectDeliveryJob = (orderId, driverId) => {
+    const rejectDeliveryJob = async (orderId, driverId) => {
         setOrders(prev => prev.map(o => {
             if (o.id !== orderId) return o
-            const rejectedBy = o.rejectedBy || []
-            // If already rejected by this driver (shouldn't happen if filtered), don't duplicate
+            const rejectedBy = [...(o.rejectedBy || [])]
             if (driverId && !rejectedBy.includes(driverId)) {
                 rejectedBy.push(driverId)
             }
@@ -460,6 +494,20 @@ export function AppProvider({ children }) {
                 rejectedBy
             }
         }))
+
+        // Persist rejection to server
+        try {
+            const order = orders.find(o => o.id === orderId)
+            const rejectedBy = [...(order?.rejectedBy || [])]
+            if (driverId && !rejectedBy.includes(driverId)) rejectedBy.push(driverId)
+            await fetch(`/api/orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'preparing', rejectedBy })
+            })
+        } catch (err) {
+            console.warn('Failed to persist rejection:', err.message)
+        }
     }
 
     const value = {
