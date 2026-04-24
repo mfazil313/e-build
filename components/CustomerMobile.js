@@ -1405,7 +1405,6 @@ export default function CustomerInterface() {
                             </aside>
                         </>
                     )}
-                </div>
 
                 {/* ── BOTTOM NAV (Mobile Only) ────────────────────────────── */}
                 <nav className={styles.bottomNav}>
@@ -1430,7 +1429,6 @@ export default function CustomerInterface() {
                     ))}
                 </nav>
         </div>
-        </div >
     )
 }
 
