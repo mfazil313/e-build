@@ -401,6 +401,33 @@ export default function CustomerInterface() {
         }
     }
 
+    // ── Memoized values (must be before auth guard returns) ────────────────────
+    const cartTotal = useMemo(() => cart.reduce((s, i) => s + i.price * i.quantity, 0), [cart])
+    const cartCount = useMemo(() => cart.reduce((s, i) => s + i.quantity, 0), [cart])
+
+    // ── Filtered + sorted products ────────────────────────────────────────────
+    const sorted = useMemo(() => {
+        const filteredList = products.filter(p => {
+            const q = searchQuery.toLowerCase()
+            return (p.name?.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q)) &&
+                (selectedCategory === 'all' || p.category === selectedCategory)
+        })
+
+        return [...filteredList].sort((a, b) => {
+            if (sortBy === 'price_asc') return a.price - b.price
+            if (sortBy === 'price_desc') return b.price - a.price
+            if (sortBy === 'rating') {
+                const aRating = a.ratingCount > 0 ? a.rating : -1;
+                const bRating = b.ratingCount > 0 ? b.rating : -1;
+                if (bRating !== aRating) {
+                    return bRating - aRating;
+                }
+                return (b.ratingCount || 0) - (a.ratingCount || 0);
+            }
+            return 0
+        })
+    }, [products, searchQuery, selectedCategory, sortBy])
+
     // ── Auth guard ────────────────────────────────────────────────────────────
     if (authLoading) return <ConstructionLoader message="Loading…" />
     if (!isAuthenticated) return <LoginForm role="customer" isOverlay={false} />
@@ -433,8 +460,6 @@ export default function CustomerInterface() {
         ctxUpdateQty(id, qty)
     }
 
-    const cartTotal = useMemo(() => cart.reduce((s, i) => s + i.price * i.quantity, 0), [cart])
-    const cartCount = useMemo(() => cart.reduce((s, i) => s + i.quantity, 0), [cart])
 
     // ── Compare ───────────────────────────────────────────────────────────────
     const toggleCompare = (product) => {
@@ -493,28 +518,6 @@ export default function CustomerInterface() {
         }
     }
 
-    // ── Filtered + sorted products ────────────────────────────────────────────
-    const sorted = useMemo(() => {
-        const filteredList = products.filter(p => {
-            const q = searchQuery.toLowerCase()
-            return (p.name?.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q)) &&
-                (selectedCategory === 'all' || p.category === selectedCategory)
-        })
-
-        return [...filteredList].sort((a, b) => {
-            if (sortBy === 'price_asc') return a.price - b.price
-            if (sortBy === 'price_desc') return b.price - a.price
-            if (sortBy === 'rating') {
-                const aRating = a.ratingCount > 0 ? a.rating : -1;
-                const bRating = b.ratingCount > 0 ? b.rating : -1;
-                if (bRating !== aRating) {
-                    return bRating - aRating;
-                }
-                return (b.ratingCount || 0) - (a.ratingCount || 0);
-            }
-            return 0
-        })
-    }, [products, searchQuery, selectedCategory, sortBy])
 
     // ── Place Order (shows success modal) ─────────────────────────────────────
     const handlePlaceOrder = () => {
@@ -731,7 +734,10 @@ export default function CustomerInterface() {
                                 </div>
                             )}
                         </div>
-                    </nav>
+                        </div>
+                    </div>
+                </div>
+            </nav>
 
                     {/* ── BROWSE TAB ──────────────────────────────────────────── */}
                     {activeTab === 'browse' && (

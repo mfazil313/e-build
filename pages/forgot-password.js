@@ -37,7 +37,7 @@ export default function ForgotPassword() {
                 <div className={styles.welcomeHeader}>
                     <h1 className={styles.welcomeTitle} style={{ fontSize: '1.75rem' }}>Reset Password</h1>
                     <p className={styles.welcomeSubtitle}>
-                        Enter your email address and we'll send you a link to reset your password.
+                        Enter your email address and we&apos;ll send you a link to reset your password.
                     </p>
                 </div>
 

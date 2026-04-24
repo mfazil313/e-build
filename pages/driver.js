@@ -373,7 +373,7 @@ export default function DriverDashboard() {
 
                 {/* Hero earnings card */}
                 <div className={styles.heroEarnings}>
-                    <p className={styles.heroEarningsLabel}>Today's Earnings</p>
+                    <p className={styles.heroEarningsLabel}>Today&apos;s Earnings</p>
                     <div className={styles.heroEarningsAmount}>
                         <span>₹</span>{(Math.round(todayEarnings)).toLocaleString('en-IN')}
                     </div>
@@ -425,7 +425,7 @@ export default function DriverDashboard() {
                             {!isOnline ? (
                                 <div className={styles.emptyPane}>
                                     <div className={styles.emptyRing}>{I.TruckLg}</div>
-                                    <p className={styles.emptyTitle}>You're Offline</p>
+                                    <p className={styles.emptyTitle}>You&apos;re Offline</p>
                                     <p className={styles.emptySub}>Toggle online from the header to start receiving high-paying delivery jobs</p>
                                 </div>
                             ) : deliveryJobs.length === 0 ? (
