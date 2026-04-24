@@ -734,7 +734,6 @@ export default function CustomerInterface() {
                                 </div>
                             )}
                         </div>
-                        </div>
                     </div>
                 </div>
             </nav>
