@@ -1,0 +1,1147 @@
+/* Container — ONE background for the entire page */
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Single tall gradient — no section breaks */
+    background:
+        radial-gradient(ellipse at 90% 5%, rgba(237, 233, 254, 0.9) 0%, transparent 40%),
+        radial-gradient(ellipse at 8% 20%, rgba(252, 231, 243, 0.8) 0%, transparent 38%),
+        radial-gradient(ellipse at 75% 45%, rgba(245, 243, 255, 0.6) 0%, transparent 38%),
+        radial-gradient(ellipse at 10% 65%, rgba(237, 233, 254, 0.7) 0%, transparent 38%),
+        radial-gradient(ellipse at 85% 80%, rgba(252, 231, 243, 0.6) 0%, transparent 38%),
+        radial-gradient(ellipse at 30% 95%, rgba(245, 243, 255, 0.5) 0%, transparent 38%),
+        #ffffff;
+    background-attachment: fixed;
+    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Main — fully transparent, shows container background */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: transparent;
+}
+
+/* ── Navbar ──────────────────────────────── */
+.navbar {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 100;
+    border-bottom: 1px solid rgba(109, 40, 217, 0.1);
+    box-shadow: 0 1px 24px rgba(79, 70, 229, 0.06);
+}
+
+.navContent {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    text-decoration: none;
+}
+
+.logoIcon {
+    font-size: 1.55rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(236, 72, 153, 0.12));
+    border: 1px solid rgba(109, 40, 217, 0.15);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.logoText {
+    background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Nav centre links */
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.navLinks a {
+    color: #475569;
+    text-decoration: none;
+    padding: 0.45rem 1rem;
+    border-radius: 9999px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.navLinks a:hover {
+    color: #4f46e5;
+    background: rgba(79, 70, 229, 0.07);
+}
+
+/* CTA button on the right */
+.navCta {
+    padding: 0.55rem 1.4rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+    color: white !important;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s !important;
+}
+
+.navCta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3) !important;
+    background: linear-gradient(135deg, #4338ca 0%, #db2777 100%) !important;
+    color: white !important;
+    background-color: unset !important;
+}
+
+/* Subtle dot-grid overlay on top of the gradient bg */
+.backgroundShapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Hide shape divs — the grid is on the container */
+.shape1,
+.shape2,
+.shape3 {
+    display: none;
+}
+
+/* ── Hero ─────────────────────────────────── */
+.hero {
+    position: relative;
+    z-index: 1;
+    padding: 8rem 2rem 6rem;
+    text-align: center;
+    overflow: visible;
+    /* allow blobs to bleed into next section */
+}
+
+/* Top-right indigo blob */
+.hero::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background: rgba(99, 102, 241, 0.12);
+    border-radius: 50%;
+    top: -250px;
+    right: -180px;
+    filter: blur(100px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Bottom-left pink blob — bleeds into next section */
+.hero::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: rgba(236, 72, 153, 0.1);
+    border-radius: 50%;
+    bottom: -200px;
+    left: -150px;
+    filter: blur(100px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.heroContent {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+    animation: slideDown 0.6s ease-out;
+}
+
+.heroTitle {
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    font-family: 'Outfit', sans-serif;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    animation: scaleIn 0.8s ease-out;
+}
+
+.gradientText {
+    background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Keep the old .gradient alias just in case */
+.gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.heroSubtitle {
+    font-size: 1.25rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    animation: fadeIn 1s ease-out 0.3s backwards;
+}
+
+.heroStats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    animation: fadeIn 1s ease-out 0.5s backwards;
+}
+
+.statItem {
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.statItem strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.statDivider {
+    width: 1px;
+    height: 40px;
+    background: #cbd5e1;
+}
+
+/* ── Role Section ─────────────────────────── */
+.roleSection {
+    padding: 7rem 2rem;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+    /* allow blobs to bleed across sections */
+    z-index: 1;
+}
+
+/* Top-right orb — bleeds in from hero above */
+.roleSection::before {
+    content: '';
+    position: absolute;
+    width: 650px;
+    height: 650px;
+    background: rgba(236, 72, 153, 0.08);
+    border-radius: 50%;
+    top: -200px;
+    right: -150px;
+    filter: blur(100px);
+    pointer-events: none;
+}
+
+/* Bottom-left orb — bleeds into features below */
+.roleSection::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: rgba(99, 102, 241, 0.08);
+    border-radius: 50%;
+    bottom: -200px;
+    left: -120px;
+    filter: blur(100px);
+    pointer-events: none;
+}
+
+.sectionTitle {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    font-family: 'Outfit', sans-serif;
+    color: #1e293b;
+    position: relative;
+    z-index: 1;
+}
+
+.roleGrid {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.roleCard {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.1),
+        0 4px 16px rgba(79, 70, 229, 0.1),
+        0 0 30px rgba(109, 40, 217, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.roleCard:hover {
+    transform: translateY(-10px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(245, 243, 255, 0.98) 100%);
+    border-color: rgba(167, 139, 250, 0.45);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.2),
+        0 16px 40px rgba(79, 70, 229, 0.18),
+        0 0 70px rgba(109, 40, 217, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.roleCardActive {
+    border-color: rgba(109, 40, 217, 0.4);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.12);
+}
+
+/* Gradient top accent strip */
+.roleAccentBar {
+    height: 6px;
+    width: 100%;
+}
+
+/* Large emoji displayed freely — no circle */
+.roleFreeIcon {
+    font-size: 4.5rem;
+    padding: 2rem 2.5rem 0.75rem;
+    line-height: 1;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s;
+}
+
+.roleCard:hover .roleFreeIcon {
+    transform: scale(1.15) rotate(-3deg);
+}
+
+.roleTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    padding: 0 2.5rem 0.5rem;
+    font-family: 'Outfit', sans-serif;
+    color: #1e1b4b;
+}
+
+.roleDescription {
+    color: #64748b;
+    padding: 0 2.5rem 1.5rem;
+    line-height: 1.65;
+    font-size: 1rem;
+}
+
+.roleFeatures {
+    list-style: none;
+    padding: 0 2.5rem 2rem;
+    margin: 0;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.5rem;
+}
+
+.roleFeatures li {
+    padding: 0.45rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+/* Dot bullet — matches the indigo-pink theme */
+.featureDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #ec4899);
+    flex-shrink: 0;
+}
+
+.roleButton {
+    display: block;
+    width: calc(100% - 5rem);
+    margin: 0 2.5rem 2.5rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    text-align: center;
+}
+
+.roleButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    filter: brightness(1.05);
+}
+
+/* Keep old .roleIcon for backward compat */
+.roleIcon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+/* Keep old .checkIcon in case referenced elsewhere */
+.checkIcon {
+    color: white;
+    background: #10b981;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Features Section ────────────────────── */
+.features {
+    padding: 6rem 2rem;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+}
+
+.features::before {
+    content: '';
+    position: absolute;
+    width: 650px;
+    height: 650px;
+    background: rgba(79, 70, 229, 0.07);
+    border-radius: 50%;
+    top: -200px;
+    left: -150px;
+    filter: blur(100px);
+    pointer-events: none;
+}
+
+.featureGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.featureCard {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2.5rem 1.75rem;
+    border-radius: 1.75rem;
+    text-align: center;
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.1),
+        0 4px 16px rgba(79, 70, 229, 0.1),
+        0 0 30px rgba(109, 40, 217, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featureCard:hover {
+    transform: translateY(-8px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(245, 243, 255, 0.98) 100%);
+    border-color: rgba(167, 139, 250, 0.45);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.2),
+        0 12px 32px rgba(79, 70, 229, 0.15),
+        0 0 60px rgba(109, 40, 217, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Re-use contactIconWrap / contactEmoji for icons — no extra CSS needed */
+
+.featureCard h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.featureCard p {
+    color: #64748b;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+/* Keep old .featureIcon for backward compat */
+.featureIcon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    background: #f1f5f9;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── How It Works ────────────────────────── */
+.howItWorks {
+    padding: 6rem 2rem;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+}
+
+.howItWorks::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background: rgba(167, 139, 250, 0.08);
+    border-radius: 50%;
+    top: -220px;
+    right: -200px;
+    filter: blur(100px);
+    pointer-events: none;
+}
+
+.howHeader {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.howBadge {
+    display: inline-block;
+    padding: 0.4rem 1.1rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%);
+    border: 1px solid rgba(109, 40, 217, 0.2);
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6d28d9;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.howSubtitle {
+    color: #64748b;
+    font-size: 1.05rem;
+    margin-top: 0.75rem;
+}
+
+.stepsGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+}
+
+/* The connecting line that runs across all steps */
+.stepsGrid::before {
+    content: '';
+    position: absolute;
+    top: 44px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #a855f7, #ec4899);
+    z-index: 0;
+}
+
+.step {
+    text-align: center;
+    padding: 0 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Icon + number stacked together */
+.stepIconWrap {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 1.5rem;
+}
+
+.stepEmoji {
+    width: 88px;
+    height: 88px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    box-shadow:
+        0 0 0 4px white,
+        0 0 0 6px rgba(109, 40, 217, 0.2),
+        0 10px 25px rgba(79, 70, 229, 0.15);
+    transition: transform 0.3s;
+}
+
+.step:hover .stepEmoji {
+    transform: translateY(-6px) scale(1.08);
+    box-shadow:
+        0 0 0 4px white,
+        0 0 0 6px rgba(236, 72, 153, 0.3),
+        0 16px 30px rgba(236, 72, 153, 0.2);
+}
+
+.stepNum {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #4f46e5, #ec4899);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    box-shadow: 0 0 0 3px white;
+    z-index: 2;
+}
+
+.step h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.step p {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Hide the old connector div — line is done via ::before on grid */
+.stepConnector {
+    display: none;
+}
+
+/* Keep old .stepNumber for any leftover reference */
+.stepNumber {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #4f46e5, #ec4899);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin: 0 auto 1.5rem;
+}
+
+/* ── Contact ─────────────────────────────── */
+.contactSection {
+    padding: 6rem 2rem;
+    background: transparent;
+    position: relative;
+    overflow: visible;
+}
+
+.contactSection::before {
+    content: '';
+    position: absolute;
+    width: 650px;
+    height: 650px;
+    background: rgba(236, 72, 153, 0.07);
+    border-radius: 50%;
+    bottom: -200px;
+    left: -150px;
+    filter: blur(100px);
+    pointer-events: none;
+}
+
+.contactGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.contactCard {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2.5rem 1.75rem;
+    border-radius: 1.75rem;
+    text-align: center;
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.1),
+        0 4px 16px rgba(79, 70, 229, 0.1),
+        0 0 30px rgba(109, 40, 217, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contactCard:hover {
+    transform: translateY(-8px);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 1) 0%, rgba(245, 243, 255, 0.98) 100%);
+    border-color: rgba(167, 139, 250, 0.45);
+    box-shadow:
+        0 0 0 1px rgba(167, 139, 250, 0.2),
+        0 12px 32px rgba(79, 70, 229, 0.15),
+        0 0 60px rgba(109, 40, 217, 0.12),
+        0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.contactIconWrap {
+    margin: 0 auto 1.5rem;
+    width: 80px;
+    height: 80px;
+}
+
+.contactEmoji {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow:
+        0 0 0 4px white,
+        0 0 0 6px rgba(109, 40, 217, 0.15),
+        0 8px 20px rgba(79, 70, 229, 0.12);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.contactCard:hover .contactEmoji {
+    transform: translateY(-4px) scale(1.08);
+    box-shadow:
+        0 0 0 4px white,
+        0 0 0 6px rgba(236, 72, 153, 0.25),
+        0 14px 28px rgba(236, 72, 153, 0.18);
+}
+
+.contactCard h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.contactCard p {
+    color: #64748b;
+    line-height: 1.75;
+    font-size: 0.95rem;
+}
+
+/* Keep old .contactIcon for backward compat */
+.contactIcon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* ── Footer ──────────────────────────────── */
+.footer {
+    background: #0a0f1e;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+}
+
+/* three-column grid */
+.footerInner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem 3rem;
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1.4fr;
+    gap: 3rem;
+}
+
+/* Brand column — uses flex column layout inherited */
+
+.footerLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+}
+
+.footerLogoIcon {
+    font-size: 1.6rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(236, 72, 153, 0.2));
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footerLogoText {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8 0%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.footerTagline {
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    max-width: 280px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.88rem;
+}
+
+/* Social icons row */
+.footerSocials {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.socialIcon {
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.socialIcon:hover {
+    color: #fff;
+    background: rgba(79, 70, 229, 0.35);
+    border-color: rgba(167, 139, 250, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Link columns — flex column layout inherited */
+
+.footerColTitle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.footerLinks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footerLinks a {
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.88rem;
+}
+
+.footerLinks a:hover {
+    color: #a78bfa;
+}
+
+/* Contact rows — now anchor tags */
+.footerContactRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footerContactRow:hover {
+    color: #a78bfa;
+}
+
+.contactSvgIcon {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+/* Bottom bar */
+.footerBottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.35);
+    text-align: center;
+}
+
+.footerMadeWith {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+    .footerInner {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2.5rem 1.5rem;
+    }
+
+    .footerBottom {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}
+
+/* ── Keyframes ───────────────────────────── */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 768px) {
+    .heroTitle {
+        font-size: 2.25rem;
+    }
+
+    .heroSubtitle {
+        font-size: 1.05rem;
+    }
+
+    .navLinks {
+        display: none;
+    }
+
+    .heroStats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .statDivider {
+        display: none;
+    }
+
+    .roleGrid,
+    .featureGrid,
+    .stepsGrid,
+    .contactGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 6rem 1rem 4rem;
+    }
+
+    .sectionTitle {
+        font-size: 2rem;
+    }
+}
+
+/* ── Marquee Bar ──────────────────────────── */
+.marqueeBar {
+    width: 100%;
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    overflow: hidden;
+    padding: 0.55rem 0;
+    position: relative;
+    z-index: 10;
+}
+
+.marqueeTrack {
+    display: flex;
+    gap: 0;
+    white-space: nowrap;
+    animation: marqueeScroll 40s linear infinite;
+    width: max-content;
+}
+
+.marqueeItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0 0.5rem;
+    white-space: nowrap;
+}
+
+.marqueeDot {
+    color: rgba(255, 255, 255, 0.4);
+    margin-left: 0.6rem;
+    font-size: 0.6rem;
+}
+
+@keyframes marqueeScroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ── Floating Construction Icons ─────────── */
+.floatingIcons {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floatIcon {
+    position: absolute;
+    opacity: 0.08;
+    animation: floatUpDown 6s ease-in-out infinite;
+    filter: grayscale(0.2);
+    user-select: none;
+    line-height: 1;
+}
+
+@keyframes floatUpDown {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    33% {
+        transform: translateY(-14px) rotate(4deg);
+    }
+
+    66% {
+        transform: translateY(8px) rotate(-3deg);
+    }
+}
+
+/* ── countNum (used within statItem strong) ── */
+.countNum {
+    display: inline;
+    font-variant-numeric: tabular-nums;
+}

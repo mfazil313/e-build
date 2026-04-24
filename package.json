@@ -1,0 +1,29 @@
+{
+  "name": "construction-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "appwrite": "^22.4.0",
+    "better-sqlite3": "^12.6.2",
+    "cheerio": "^1.2.0",
+    "date-fns": "^3.3.0",
+    "js-cookie": "^3.0.5",
+    "next": "^14.2.0",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.18.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-icons": "^5.0.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0"
+  }
+}

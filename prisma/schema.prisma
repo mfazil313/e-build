@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String?  // Made optional for OAuth users
+  name      String
+  role      String   // "supplier", "customer", "driver"
+  details   String?  // JSON string for extra details
+  image     String?  // For Google Avatar
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  category         String
+  price            Float
+  unit             String
+  stock            Int
+  minOrder         Int?
+  description      String?
+  image            String?
+  supplierId       String
+  supplierName     String
+  supplierLocation String?
+  rating           Float    @default(0)
+  reviews          Int      @default(0)
+  ratingCount      Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at")
+}
+
+model Supplier {
+  id           String  @id
+  supplierName String?
+  shopName     String?
+  address      String?
+  image        String?
+  lastUpdated  String?
+}
+
+model Customer {
+  id          String  @id
+  fullName    String?
+  phone       String?
+  image       String?
+  lastUpdated String?
+}
